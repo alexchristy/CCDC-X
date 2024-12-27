@@ -39,9 +39,9 @@ options:
     required: false
     default: false
     type: bool
-  ref_vmid:
+  router_vmid:
     description:
-      - A reference VMID that defines the network theme (e.g., 111003).
+      - Router VMID used to connect VMs to the same network.
     required: true
     type: int
   netmask_len:
@@ -75,7 +75,7 @@ EXAMPLES = """
     api_host: "proxmox.local"
     api_user: "root@pam"
     api_password: "secret"
-    ref_vmid: 111003
+    router_vmid: 111003
     netmask_len: 3
     num: 2
   register: result
@@ -233,7 +233,7 @@ def run() -> None:  # pragma: no cover
             api_user=dict(type="str", required=True),
             api_password=dict(type="str", required=True, no_log=True),
             verify_ssl=dict(type="bool", required=False, default=False),
-            ref_vmid=dict(type="int", required=True),
+            router_vmid=dict(type="int", required=True),
             netmask_len=dict(type="int", required=True),
             num=dict(type="int", required=False, default=1),
         )
@@ -254,7 +254,7 @@ def run() -> None:  # pragma: no cover
     try:
         themed_vmids = gen_themed_vmid(
             proxmox_api,
-            reference_vmid=module.params["ref_vmid"],
+            reference_vmid=module.params["router_vmid"],
             netmask_len=module.params["netmask_len"],
             num=module.params["num"],
         )

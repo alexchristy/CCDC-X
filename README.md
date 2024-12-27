@@ -7,7 +7,7 @@ All playbooks are in `playbooks/`.
 
 1) `gen_random_ccdc.yml`
 
-    This playbook will create linked clones a series of randomly chosen VMs from a node's templates. Requires a single argument `ref_vmid` which tells the playbook what pattern VMIDs should follow.
+    This playbook will create linked clones a series of randomly chosen VMs from a node's templates. Requires a single argument `router_vmid` which tells the playbook what pattern VMIDs should follow.
 
     With the current configuration running the example command below, the playbook will clone and create 5 VM clones with the VMIDs: 666000, 666001, 666002, 666003, 666004 assumming
     the VMIDs are available. If not it will find and assign VMIDs that are available in that theme.
@@ -16,7 +16,7 @@ All playbooks are in `playbooks/`.
 
     **Example:**
     ```bash
-    ansible-playbook -i inventory/hosts.ini playbooks/gen_random_ccdc.yml --ask-vault-pass -e "ref_vmid=666000"
+    ansible-playbook -i inventory/hosts.ini playbooks/gen_random_ccdc.yml --ask-vault-pass -e "router_vmid=666000"
     ```
 
 2) `teardown_network.yml`

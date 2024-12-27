@@ -1,0 +1,12 @@
+- name: Verify required variables are defined
+  assert:
+    that:
+      - proxmox_api_user is defined
+      - proxmox_api_password is defined
+      - number_of_hosts is defined
+      - network_name is defined
+      - vmid_netmask_len is defined
+      - router_vmid is defined
+    fail_msg: "Required variables are not defined"
+    success_msg: "All required variables are defined"
+  no_log: true

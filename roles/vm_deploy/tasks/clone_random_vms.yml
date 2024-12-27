@@ -6,7 +6,7 @@
       - number_of_hosts is defined
       - network_name is defined
       - vmid_netmask_len is defined
-      - ref_vmid is defined
+      - router_vmid is defined
     fail_msg: "Required variables are not defined"
     success_msg: "All required variables are defined"
   no_log: true
@@ -33,7 +33,7 @@
     api_host: "{{ ansible_host }}"
     api_user: "{{ proxmox_api_user }}"
     api_password: "{{ proxmox_api_password }}"
-    ref_vmid: "{{ ref_vmid }}"
+    router_vmid: "{{ router_vmid }}"
     netmask_len: "{{ vmid_netmask_len }}"
     num: "{{ number_of_hosts }}"
   register: themed_vmids

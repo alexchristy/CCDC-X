@@ -4,6 +4,7 @@
       import_tasks: clone_random_vms.yml
       tags: clone
 
+    # Populates ansible_facts with network VMs
     - name: Get network VMs
       include_role:
         name: shared_tasks
