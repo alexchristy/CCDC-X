@@ -1,0 +1,37 @@
+# Description:
+# ============
+# Get VMs that are part of the deployed network. This 
+# task will get the VMs that are part of the network by
+# either vmid or name automatically depending on the 
+# available variables.
+#
+# Input:
+# ======
+#   - If network_vmids is defined, it will get the VMs by vmid.
+#   - If network_name is defined, it will get the VMs by name.
+#
+# Output:
+# =======
+#   - network_vms: List of VMs that are part of the network
+
+- name: Verify required variables are defined
+  assert:
+    that:
+      - proxmox_api_user is defined
+      - proxmox_api_password is defined
+      - network_name is defined or network_vmids is defined
+    fail_msg: "Required variables are not defined"
+    success_msg: "All required variables are defined"
+  no_log: true
+
+# The network_vmids var will not always be available, so
+# we check for it first since network_name will always be available
+- name: Get network VMs by vmid
+  include_tasks: get_network_vms_by_vmid.yml
+  when: network_vmids is defined
+
+- name: Get network VMs by name (fallback)
+  include_tasks: get_network_vms_by_name.yml
+  when: 
+    - network_name is defined
+    - network_vmids is not defined

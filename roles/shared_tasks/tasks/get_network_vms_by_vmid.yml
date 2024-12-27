@@ -1,0 +1,21 @@
+- name: Verify required variables are defined
+  assert:
+    that:
+      - proxmox_api_user is defined
+      - proxmox_api_password is defined
+      - network_vmids is defined
+    fail_msg: "Required variables are not defined"
+    success_msg: "All required variables are defined"
+  no_log: true
+
+- name: List all existing VMs on node
+  community.general.proxmox_vm_info:
+    api_host: "{{ ansible_host }}"
+    api_user: "{{ proxmox_api_user }}"
+    api_password: "{{ proxmox_api_password }}"
+    node: "{{ inventory_hostname }}"
+  register: node_vm_info
+
+- name: Export network VMs info by vmid
+  set_fact:
+    network_vms: "{{ node_vm_info.proxmox_vms | selectattr('vmid', 'in', network_vmids) | list }}"

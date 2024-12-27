@@ -1,0 +1,25 @@
+- name: Random Network Setup
+  block:
+    - name: Clone VMs
+      import_tasks: clone_random_vms.yml
+      tags: clone
+
+    - name: Get network VMs
+      include_role:
+        name: shared_tasks
+        tasks_from: get_network_vms.yml
+      tags: find
+
+    - name: Start VMs
+      include_role:
+        name: shared_tasks
+        tasks_from: start_vms.yml
+      tags: start
+
+  rescue:
+    - name: Cleanup on failure
+      include_role:
+        name: teardown
+      tags: cleanup
+      
+    

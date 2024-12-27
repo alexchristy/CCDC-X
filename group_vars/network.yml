@@ -1,0 +1,5 @@
+network_name: "test" # Must be DNS compliant
+vmid_netmask_len: 3
+number_of_hosts: 5
+network_subnet: "192.168.199.0/24"
+gateway_ip: "192.168.199.1"

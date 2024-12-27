@@ -1,0 +1,71 @@
+- name: Verify required variables are defined
+  assert:
+    that:
+      - proxmox_api_user is defined
+      - proxmox_api_password is defined
+      - number_of_hosts is defined
+      - network_name is defined
+      - vmid_netmask_len is defined
+      - ref_vmid is defined
+    fail_msg: "Required variables are not defined"
+    success_msg: "All required variables are defined"
+  no_log: true
+
+- name: List all existing VMs on node
+  community.general.proxmox_vm_info:
+    api_host: "{{ ansible_host }}"
+    api_user: "{{ proxmox_api_user }}"
+    api_password: "{{ proxmox_api_password }}"
+    node: "{{ inventory_hostname }}"
+  register: node_vm_info
+
+- name: Gather VMIDs of templates
+  set_fact:
+    template_vmids: "{{ node_vm_info.proxmox_vms | selectattr('template', 'equalto', true) | map(attribute='vmid') | list }}"
+
+- name: Randomly select templates for network
+  set_fact:
+    random_vmids: "{{ random_vmids | default([]) + [template_vmids | random] }}"
+  with_sequence: count="{{ number_of_hosts }}"
+
+- name: Generate themed VMIDs for new VMs
+  proxmox_themed_vmid:
+    api_host: "{{ ansible_host }}"
+    api_user: "{{ proxmox_api_user }}"
+    api_password: "{{ proxmox_api_password }}"
+    ref_vmid: "{{ ref_vmid }}"
+    netmask_len: "{{ vmid_netmask_len }}"
+    num: "{{ number_of_hosts }}"
+  register: themed_vmids
+
+- name: Clone VMs from templates
+  community.general.proxmox_kvm:
+    api_host: "{{ ansible_host }}"
+    api_user: "{{ proxmox_api_user }}"
+    api_password: "{{ proxmox_api_password }}"
+    node: "{{ inventory_hostname }}"
+    clone: "arbitrary_value"
+    vmid: "{{ random_vmids[item.0] }}"
+    newid: "{{ item.1 }}"
+    name: "{{ network_name }}-vm-{{ item.0 }}"
+    full: false
+  async: 300  # Maximum wait time (in seconds)
+  poll: 0     # Run in the background
+  with_indexed_items: "{{ themed_vmids.themed_vmids }}"
+  register: clone_vm_jobs
+
+- name: Wait for all VMs to clone
+  async_status:
+    jid: "{{ item.ansible_job_id }}"
+  loop: "{{ clone_vm_jobs.results }}"
+  register: job_result
+  until: job_result.finished
+  retries: 60
+  delay: 5  # Check every 5 seconds
+  no_log: true
+
+- name: Rename themed_vmids to network_vmids
+  set_fact:
+    network_vmids: "{{ themed_vmids.themed_vmids }}"
+  no_log: true
+

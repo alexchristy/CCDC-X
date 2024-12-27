@@ -1,0 +1,15 @@
+# The order of packages is significant, because pip processes them in the order
+# of appearance. Changing the order has an impact on the overall integration
+# process, which may cause wedges in the gate later.
+
+hacking~=6.0
+stestr>=1.1.0 # Apache-2.0
+coverage>=3.6 # Apache-2.0
+sphinx>1.6
+black~=23.0
+ruff>=0.8.0
+pytest>=8.3.3
+pytest-mock>=3.14.0
+pytest-cov>=6.0.0
+pre-commit>=4.0.1
+mypy>=1.13.0

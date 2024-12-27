@@ -1,0 +1,16 @@
+---
+# Playbook: teardown_network.yml
+# Description: This playbook tears down deployed networks on all Proxmox nodes.
+# Author: Alex Christy
+# Date: 2024-12-25
+# Version: 1.0
+# Notes: Ensure the inventory has the 'proxmox_nodes' groups.
+
+- name: Teardown generated network
+  hosts: proxmox_nodes
+  gather_facts: no
+  vars_files:
+    - "{{ playbook_dir }}/../group_vars/proxmox.yml"
+    - "{{ playbook_dir }}/../group_vars/network.yml"
+  roles:
+    - teardown

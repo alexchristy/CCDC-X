@@ -1,0 +1,16 @@
+---
+# Playbook: gen_random_ccdc.yml
+# Description: This playbook deploys a random network of VMs to all Proxmox nodes.
+# Author: Alex Christy
+# Date: 2024-12-25
+# Version: 1.0
+# Notes: Ensure the inventory has the 'proxmox_nodes' groups.
+
+- name: Generate random CCDC network
+  hosts: proxmox_nodes
+  gather_facts: no
+  vars_files:
+    - "{{ playbook_dir }}/../group_vars/proxmox.yml"
+    - "{{ playbook_dir }}/../group_vars/network.yml"
+  roles:
+    - random_network_setup

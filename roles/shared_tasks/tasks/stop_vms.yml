@@ -1,0 +1,37 @@
+- name: Verify required variables are defined
+  assert:
+    that:
+      - proxmox_api_user is defined
+      - proxmox_api_password is defined
+      - network_name is defined
+      - network_vms is defined
+    fail_msg: "Required variables are not defined"
+    success_msg: "All required variables are defined"
+  no_log: true
+
+- name: Find VMs to stop
+  set_fact:
+    vmids_to_stop: "{{ network_vms | selectattr('status', 'equalto', 'running') | map(attribute='vmid') | list }}"
+
+- name: Stop VMs
+  community.general.proxmox_kvm:
+    api_host: "{{ ansible_host }}"
+    api_user: "{{ proxmox_api_user }}"
+    api_password: "{{ proxmox_api_password }}"
+    node: "{{ inventory_hostname }}"
+    vmid: "{{ item }}"
+    state: stopped
+  async: 300  # Maximum wait time (in seconds)
+  poll: 0     # Run in the background
+  loop: "{{ vmids_to_stop }}"
+  register: stop_vm_jobs
+
+- name: Wait for all VMs to stop
+  async_status:
+    jid: "{{ item.ansible_job_id }}"
+  loop: "{{ stop_vm_jobs.results }}"
+  register: job_result
+  until: job_result.finished
+  retries: 60
+  delay: 5  # Check every 5 seconds
+  no_log: true
