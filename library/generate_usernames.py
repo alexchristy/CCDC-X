@@ -250,18 +250,23 @@ def run() -> None:  # pragma: no cover
     name_seeds: list[str] = module.params["name_seeds"]
     req_num_usernames: int = module.params["number"]
     scheme: str = module.params["scheme"]
-    existing_usernames = set(module.params["existing_usernames"])
+    existing_usernames = (
+        set(module.params["existing_usernames"])
+        if module.params["existing_usernames"]
+        else set()
+    )
     lowercase_choice: bool = module.params["lowercase"]
 
     usernames = existing_usernames.copy()
 
     try:
         # Generate seeded usernames
-        for name in name_seeds:
-            if len(usernames - existing_usernames) >= req_num_usernames:
-                break
+        if name_seeds:
+            for name in name_seeds:
+                if len(usernames - existing_usernames) >= req_num_usernames:
+                    break
 
-            usernames.add(gen_seeded_username(name, scheme, lower=lowercase_choice))
+                usernames.add(gen_seeded_username(name, scheme, lower=lowercase_choice))
 
         # Generate random usernames to reach requested number of usernames
         while len(usernames - existing_usernames) < req_num_usernames:
