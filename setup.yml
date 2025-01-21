@@ -1,0 +1,84 @@
+---
+- name: Install sshpass
+  hosts: localhost
+  tasks:
+    - name: Install sshpass on Debian/Ubuntu
+      apt:
+        name: sshpass
+        state: present
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: Install sshpass on RHEL/CentOS
+      yum:
+        name: sshpass
+        state: present
+      when: ansible_facts['os_family'] == "RedHat"
+
+- name: Setup generated_assets/ directory
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Load configuration file group_vars/generated_assets_config.yml
+      include_vars:
+        file: "{{ playbook_dir }}/group_vars/generated_assets_config.yml"
+
+    - name: Check generated assets directory path variable
+      set_fact:
+        generated_assets_dir: "{{ generated_assets_dir | default(default_generated_assets_dir) }}"
+
+    - name: Inform user about generated assets directory variable value
+      debug:
+        msg: >
+          {% if generated_assets_dir is not defined or generated_assets_dir == default_generated_assets_dir %}
+          The variable `generated_assets_dir` was not defined. Setting it to the default value: {{ generated_assets_dir }}.
+          {% else %}
+          The variable `generated_assets_dir` was explicitly set to: {{ generated_assets_dir }}.
+          {% endif %}
+
+    ###### BEGIN USERS FOLDERS ######
+
+    - name: Create users/ directory
+      ansible.builtin.file:
+        path: "{{ users_dir }}"
+        state: directory
+        mode: "0700"
+
+    - name: Create std_users/ directory
+      ansible.builtin.file:
+        path: "{{ std_users_dir }}"
+        state: directory
+        mode: "0700"
+
+    - name: Create scoring_users/ directory
+      ansible.builtin.file:
+        path: "{{ scoring_users_dir }}"
+        state: directory
+        mode: "0700"
+
+    - name: Create uid0_users/ directory
+      ansible.builtin.file:
+        path: "{{ uid0_users_dir }}"
+        state: directory
+        mode: "0700"
+
+    - name: Create fudged_users/ directory
+      ansible.builtin.file:
+        path: "{{ fudged_sys_users_dir }}"
+        state: directory
+        mode: "0700"
+
+    ###### CONFIGURE USERS FOLDERS ######
+
+    - name: Find all directories in users directory
+      ansible.builtin.find:
+        paths: "{{ users_dir }}"
+        file_type: directory
+      register: users_directories
+
+    - name: Create ssh_keys subdirectory in each found directory
+      ansible.builtin.file:
+        path: "{{ item.path }}/ssh_keys"
+        state: directory
+        mode: '0700'
+      loop: "{{ users_directories.files }}"
+      no_log: true

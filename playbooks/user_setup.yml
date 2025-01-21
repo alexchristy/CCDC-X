@@ -1,0 +1,11 @@
+- name: Random user creation
+  hosts: linux_hosts
+  gather_facts: no
+  vars_files:
+    - "{{ playbook_dir }}/../group_vars/proxmox.yml"
+    - "{{ playbook_dir }}/../group_vars/network.yml"
+    - "{{ playbook_dir }}/../group_vars/vm_creds.yml"
+    - "{{ playbook_dir }}/../group_vars/linux_vm_config.yml"
+    - "{{ playbook_dir }}/../group_vars/generated_assets_config.yml"
+  roles:
+    - user_setup

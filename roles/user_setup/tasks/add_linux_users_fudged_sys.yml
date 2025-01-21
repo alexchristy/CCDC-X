@@ -1,0 +1,87 @@
+- name: Read /etc/shadow file
+  ansible.builtin.shell: cat /etc/shadow
+  register: shadow_content
+
+- name: Extract usernames starting with [a-z] and no passwords
+  set_fact:
+    no_password_users: >-
+      {{
+        shadow_content.stdout_lines
+        | select('search', '^([a-z][^:]*):[!*]:')
+        | map('regex_replace', '^([a-z][^:]*):.*$', '\1')
+        | list
+      }}
+
+- name: Shuffle the usernames
+  ansible.builtin.set_fact:
+    shuffled_users: "{{ no_password_users | shuffle }}"
+
+- name: Select the usernames
+  ansible.builtin.set_fact:
+    selected_usernames: "{{ shuffled_users[:fudged_sys_users_number_to_add | int] }}"
+
+- name: Fudge the usernames
+  block:
+    - name: Initialize index list
+      set_fact:
+        generated_indexes: []
+        updated_generated_indexes: []
+        fudged_usernames: []
+
+    - name: Find usernames and indexes with duplicated characters
+      set_fact:
+        generated_indexes: >-
+          {{
+            selected_usernames
+            | map('extract_most_duplicate_char_info')
+            | list
+          }}
+
+    - name: Process generated indexes and replace -1
+      set_fact:
+        updated_generated_indexes: >-
+          {{
+            updated_generated_indexes + [{
+              'username': item.string,
+              'index': (
+                (range(0, (item.string | length)) | random) if item.index == -1 else item.index
+              )
+            }]
+          }}
+      with_items: "{{ generated_indexes }}"
+      loop_control:
+        loop_var: item
+      no_log: true
+
+    - name: Replace character at the specified index with its double
+      ansible.builtin.set_fact:
+        fudged_usernames: >-
+          {{ fudged_usernames + 
+             [item.username[:item.index] + 
+             item.username[item.index] * 2 + 
+             item.username[item.index + 1:]] }}
+      loop: "{{ updated_generated_indexes }}"
+      no_log: true
+
+- name: Create users without home directories
+  ansible.builtin.user:
+    name: "{{ item }}"
+    state: present
+    shell: "{{ fudged_sys_users_shells | random }}"
+    createhome: no
+    password: "{{ fudged_sys_users_password_hash }}"
+  loop: "{{ fudged_usernames }}"
+
+- name: Collect added fudged system users info
+  import_tasks: get_linux_users_info_passwd.yml
+  vars:
+    usernames: "{{ fudged_usernames }}"
+
+- name: Save fudged system users data
+  include_role:
+    name: shared_tasks
+    tasks_from: write_data_to_yaml_file.yml
+  vars:
+    data_to_save: "{{ users_info }}" # Comes from imported playbook in above task
+    output_dir: "{{ fudged_sys_users_dir }}"
+    output_filename: "{{ inventory_hostname }}{{ fudged_sys_users_file_postfix }}"

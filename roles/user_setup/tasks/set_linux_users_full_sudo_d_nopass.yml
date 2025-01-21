@@ -1,0 +1,41 @@
+# vars:
+#   users_to_add_sudo: ["bob", "alice"] # Usernames of existing users to add sudo privileges
+
+- name: Ensure sudoers.d directory exists
+  ansible.builtin.file:
+    path: /etc/sudoers.d
+    state: directory
+    mode: '0750'
+  register: sudoers_dir
+
+- name: Grant no-password sudo privileges to users
+  block:
+    - name: Configure sudoers rules for each user
+      community.general.sudoers:
+        name: "{{ item }}"
+        state: present
+        user: "{{ item }}"
+        commands: 'ALL'
+        nopassword: true
+      loop: "{{ users_to_add_sudo }}"
+    
+    - name: Validate sudoers configuration
+      ansible.builtin.command:
+        cmd: visudo -c
+      become: true
+      register: validation_result
+      changed_when: false
+      failed_when: validation_result.rc != 0
+
+  rescue:
+    - name: Revert sudoers changes for users
+      community.general.sudoers:
+        name: "{{ item }}"
+        state: absent
+      loop: "{{ users_to_add_sudo }}"
+      
+    - name: Fail the play with an error message
+      ansible.builtin.fail:
+        msg: "Validation of sudoers configuration failed. Changes were reverted."
+  
+  when: sudoers_dir.stat.exists

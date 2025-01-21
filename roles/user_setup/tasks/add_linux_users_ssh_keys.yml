@@ -1,0 +1,67 @@
+# vars:
+#   users: ["j.johnes", "t.smith"] # List of linux usernames
+#   dest_dir: /path/to/directory/ # Path to destination directory
+
+# Generate SSH keypair for each user
+- name: Generate SSH key pair for each user
+  ansible.builtin.openssh_keypair:
+    path: "/tmp/{{ item }}_id_rsa"
+    type: rsa
+    size: "{{ [2048, 4096] | random }}"
+    state: present
+  loop: "{{ users }}"
+  register: ssh_keys
+
+# Ensure .ssh directory exists for each user
+- name: Ensure .ssh directory exists
+  ansible.builtin.file:
+    path: "/home/{{ item }}/.ssh"
+    state: directory
+    mode: '0700'
+    owner: "{{ item }}"
+    group: "{{ item }}"
+  loop: "{{ users }}"
+
+- name: Copy public key to authorized_keys
+  ansible.posix.authorized_key:
+    user: "{{ item.item }}"
+    key: "{{ item.public_key }}"
+    state: present
+    exclusive: false
+    manage_dir: true # Ensure correct permissions
+  with_items: "{{ ssh_keys.results }}"
+  no_log: true
+
+# Fetch private keys to control machine
+- name: Fetch private keys to control machine
+  ansible.builtin.fetch:
+    src: "{{ item.filename }}"
+    dest: "{{ dest_dir }}/{{ inventory_hostname }}_{{ item.item }}_id_rsa"
+    flat: yes
+  with_items: "{{ ssh_keys.results }}"
+  no_log: true
+
+- name: Clean up leftover SSH key files
+  block:
+    - name: Initialize list for accumulating found files
+      set_fact:
+        all_ssh_files_to_remove: []
+
+    - name: Find generated SSH files for each key
+      ansible.builtin.find:
+        paths: "{{ item.filename | dirname }}"
+        patterns: "{{ item.filename | basename }}*"
+      loop: "{{ ssh_keys.results }}"
+      register: found_ssh_files
+      no_log: true
+
+    - name: Accumulate all found files
+      set_fact:
+        all_ssh_files_to_remove: "{{ all_ssh_files_to_remove + found_ssh_files.results | map(attribute='files') | flatten }}"
+
+    - name: Delete accumulated SSH files
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: absent
+      loop: "{{ all_ssh_files_to_remove }}"
+      no_log: true

@@ -2,7 +2,7 @@ import random
 
 import pytest
 
-from library.generate_groups import (
+from ..generate_groups import (
     APP_MODIFIERS,
     APP_PREFIXES,
     DEPT_GROUP_MODIFIERS,
@@ -32,7 +32,10 @@ def test_gen_random_app_groups_too_many_groups() -> None:
 def test_gen_random_app_groups_valid_groups(monkeypatch: pytest.MonkeyPatch) -> None:
     """Validate that gen_random_app_groups generates valid group names."""
     test_joiner = "|"
-    monkeypatch.setattr("library.generate_groups.JOINERS", [test_joiner])
+    monkeypatch.setattr(
+        "ansible_collections.ccdcx.account_generation.plugins.modules.generate_groups.JOINERS",
+        [test_joiner],
+    )
 
     num_groups = random.randint(1, 10)  # noqa: S311 (Not crypto)
 
@@ -101,7 +104,10 @@ def test_gen_random_dept_groups_valid_group_names(
 ) -> None:
     """Test that gen_random_dept_groups generates valid group names using the word banks."""
     test_joiner = "|"
-    monkeypatch.setattr("library.generate_groups.JOINERS", [test_joiner])
+    monkeypatch.setattr(
+        "ansible_collections.ccdcx.account_generation.plugins.modules.generate_groups.JOINERS",
+        [test_joiner],
+    )
 
     num_groups = random.randint(2, 10)  # noqa: S311 (Not crypto)
     num_depts = num_groups // 2

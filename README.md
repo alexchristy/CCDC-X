@@ -1,6 +1,40 @@
 # CCDC-X
 Welcome to the 202X CCDC competition. Generate new CCDC style networks on the fly.
 
+## Setup
+
+Follow the steps below to setup the configure the project.
+
+1) Create Python virtual environment
+
+    ```bash
+    python3 -m venv venv
+    ```
+
+2) Activate virtual environment
+
+    ```bash
+    source venv/bin/activate
+    ```
+
+3) Install all Python dependencies
+
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+4) Install Ansible dependencies
+
+    ```bash
+    ansible-galaxy install -r requirements.yml
+    ```
+
+5) Configure C2 machine
+
+    ```bash
+    ansible-playbook ./setup.yml
+    ```
+
 ## Playbooks
 
 All playbooks are in `playbooks/`.

@@ -3,7 +3,7 @@ import re
 
 import pytest
 
-from library.generate_usernames import (
+from ..generate_usernames import (
     gen_scheme_username,
     gen_seeded_username,
     validate_username_scheme,

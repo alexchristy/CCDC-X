@@ -1,6 +1,6 @@
 - name: Get network VMs
   include_role:
-    name: shared_tasks
+    name: proxmox_shared_tasks
     tasks_from: get_network_vms.yml
   tags:
     - stop
@@ -8,12 +8,12 @@
 
 - name: Force Stop VMs
   include_role:
-    name: shared_tasks
+    name: proxmox_shared_tasks
     tasks_from: force_stop_vms.yml
   tags: stop
 
 - name: Delete VMs
   include_role:
-    name: shared_tasks
+    name: proxmox_shared_tasks
     tasks_from: delete_vms.yml
   tags: delete

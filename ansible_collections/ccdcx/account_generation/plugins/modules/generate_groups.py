@@ -2,7 +2,9 @@ import random
 
 from ansible.module_utils.basic import AnsibleModule
 
-from module_utils.random_utils import random_whole_divide
+from ansible_collections.ccdcx.account_generation.plugins.module_utils.random_utils import (
+    random_whole_divide,
+)
 
 DEPT_GROUPS = [
     "hr",

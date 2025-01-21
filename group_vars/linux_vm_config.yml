@@ -1,0 +1,85 @@
+########################
+# SHELL CONFIGURATIONS #
+########################
+existing_shells:
+  - "/bin/bash"
+
+#######################
+# USER CONFIGURATIONS #
+#######################
+
+###### Scoring User ######
+scoring_user_username: "auto-scoring"
+scoring_user_password: "mx*$qS=)2nXeY~Bs9RuGaQ"
+scoring_user_shell: "/bin/bash"
+
+scoring_user_password_hash_salt: "gacYsn2EKj6mk5B"
+scoring_user_password_hash: "{{ scoring_user_password | password_hash('sha512', scoring_user_password_hash_salt) }}"
+
+###### Global user configurations ######
+global_users_username_scheme: "\\f.\\l+" # Ex: John Smith --> j.smith
+global_users_default_password: "ccdctryouts25"
+global_users_shells: "{{ existing_shells }}"
+
+# Password
+global_users_default_password_hash_salt: "ansibleccdcx"
+global_users_default_password_hash: "{{ global_users_default_password | password_hash('sha512', global_users_default_password_hash_salt) }}"
+
+# SSH Keys
+global_users_ssh_keys_enabled: true
+global_users_ssh_keys_rate: 0.50 # Percentage of users to add SSH keys to
+
+# Sudo
+global_users_sudo_enabled: true
+global_users_sudo_rate: 0.35 # Percentage of users with sudo to root (password or NOPASS)
+global_users_sudo_included_user_dirs: # Directories to search for created users to add sudo permissions too
+  - ["{{ std_users_dir }}", "{{ std_users_file_postfix }}"] # std users
+  - ["{{ fudged_sys_users_dir }}", "{{ fudged_sys_users_file_postfix }}"] # fudged_sys users
+
+###### Standard (std) user configuration ######
+std_users_number_to_add: "{{ range(10, 15) | random }}" # Default random: [10, 15]
+
+# SSH
+std_users_ssh_keys_enabled: "{{ global_users_ssh_keys_enabled }}"
+std_users_ssh_keys_rate: "{{ global_users_ssh_keys_rate }}"
+
+# Usernames
+std_users_username_seeds: # List of strings
+std_users_username_scheme: "{{ global_users_username_scheme }}"
+
+# Shells
+std_users_shells: "{{ global_users_shells }}"
+
+# Password
+std_users_password: "{{ global_users_default_password }}"
+std_users_password_hash: "{{ global_users_default_password_hash }}"
+
+###### Disguised root users (UID 0) ######
+uid0_users_number_to_add: "{{ range(2, 4) | random }}" # Random: [2, 4]
+
+# SSH
+uid0_users_ssh_keys_enabled: false # Currently not working (Requires password despite SSH key presence)
+uid0_users_ssh_keys_rate: "{{ global_users_ssh_keys_rate}}"
+
+# Usernames
+uid0_users_username_seeds: # List of strings
+uid0_users_username_scheme: "{{ global_users_username_scheme }}"
+
+# Shells
+uid0_users_shells: "{{ global_users_shells }}"
+
+# Password
+uid0_users_password: "{{ global_users_default_password }}"
+uid0_users_password_hash: "{{ global_users_default_password_hash }}"
+
+###### Fudged System Users ######
+fudged_sys_users_number_to_add: "{{ range(2, 4) | random }}" # Random: [2, 4]
+
+fudged_sys_users_shells: "{{ global_users_shells }}"
+fudged_sys_users_password: "{{ global_users_default_password }}"
+fudged_sys_users_password_hash: "{{ global_users_default_password_hash }}"
+
+########################
+# GROUP CONFIGURATIONS #
+########################
+num_groups_to_add: 6

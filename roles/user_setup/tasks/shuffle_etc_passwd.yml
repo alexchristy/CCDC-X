@@ -1,0 +1,25 @@
+- name: Get metadata of /etc/passwd
+  ansible.builtin.stat:
+    path: /etc/passwd
+  register: passwd_metadata
+
+- name: Read /etc/passwd
+  ansible.builtin.slurp:
+    path: /etc/passwd
+  register: passwd_content
+
+- name: Convert content to a list of lines
+  set_fact:
+    passwd_lines: "{{ passwd_content['content'] | b64decode | split('\n') }}"
+
+- name: Shuffle the lines
+  set_fact:
+    shuffled_lines: "{{ passwd_lines | shuffle }}"
+
+- name: Write the shuffled lines back to /etc/passwd with original metadata
+  ansible.builtin.copy:
+    content: "{{ shuffled_lines | join('\n') + '\n' }}"
+    dest: /etc/passwd
+    owner: "{{ passwd_metadata.stat.uid }}"
+    group: "{{ passwd_metadata.stat.gid }}"
+    mode: "{{ passwd_metadata.stat.mode | string | regex_replace('^0+', '') }}"

@@ -1,0 +1,75 @@
+- name: Generate usernames for UID 0 users
+  ccdcx.account_generation.generate_usernames:
+    number: "{{ uid0_users_number_to_add }}"
+    scheme: "{{ uid0_users_username_scheme }}"
+    name_seeds: "{{ uid0_users_username_seeds }}"
+    lowercase: true
+  delegate_to: localhost
+  register: uid0_usernames
+
+- name: Add UID 0 users
+  ansible.builtin.user:
+    name: "{{ item }}"
+    create_home: yes
+    shell: "{{ uid0_users_shells | random }}"
+    password: "{{ uid0_users_password_hash }}"
+  with_items: "{{ uid0_usernames.usernames }}"
+  register: uid0_users_results
+
+- name: Extract successfully added UID 0 users usernames
+  set_fact:
+    uid0_added_users_usernames: "{{ uid0_users_results.results | selectattr('changed', 'equalto', true) | map(attribute='item') | list }}"
+
+- name: Collect added UID 0 users info
+  import_tasks: get_linux_users_info_passwd.yml
+  vars:
+    usernames: "{{ uid0_added_users_usernames }}"
+
+- name: Set UIDs set to 0
+  lineinfile:
+    path: /etc/passwd
+    regexp: "^{{ item }}:.*"
+    line: "{{ item }}:{{ users_info[item].password }}:0:{{ users_info[item].gid }}::{{ users_info[item].home }}:{{ users_info[item].shell }}"
+    backrefs: yes
+  with_items: "{{ uid0_added_users_usernames }}"
+
+- name: Randomly select users to install SSH keys
+  block:
+    - name: Calculate number of users
+      set_fact:
+        uid0_users_num_users: "{{ uid0_added_users_usernames | length }}"
+    
+    - name: Calculate number of SSH keys to install
+      set_fact:
+        uid0_users_num_ssh_keys: "{{ (((uid0_users_num_users | float) * uid0_users_ssh_keys_rate) | round(0, 'floor')) }}"
+
+    - name: Shuffle list of usernames
+      set_fact:
+        uid0_added_users_shuffled_usernames: "{{ uid0_added_users_usernames | shuffle }}"
+
+    - name: Randomly select users for SSH keys
+      ansible.builtin.set_fact:
+        uid0_users_ssh_selected_users: "{{ uid0_added_users_shuffled_usernames[:uid0_users_num_ssh_keys | int] }}"
+  when: uid0_users_ssh_keys_enabled is defined and uid0_users_ssh_keys_enabled is true
+
+- name: Setup SSH key for select uid0 users
+  ansible.builtin.import_tasks:
+    file: add_linux_users_ssh_keys.yml
+  vars:
+    dest_dir: "{{ uid0_users_ssh_key_dir }}"
+    users: "{{ uid0_users_ssh_selected_users }}"
+  when: uid0_users_ssh_keys_enabled is defined and uid0_users_ssh_keys_enabled is true
+
+- name: Collect updated UID 0 users info
+  import_tasks: get_linux_users_info_passwd.yml
+  vars:
+    usernames: "{{ uid0_added_users_usernames }}"
+
+- name: Save UID 0 users data
+  include_role:
+    name: shared_tasks
+    tasks_from: write_data_to_yaml_file.yml
+  vars:
+    data_to_save: "{{ users_info }}"
+    output_dir: "{{ uid0_users_dir }}"
+    output_filename: "{{ inventory_hostname }}{{ uid0_users_file_postfix }}"

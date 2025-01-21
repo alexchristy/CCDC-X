@@ -1,0 +1,14 @@
+nmm-openvpn:
+    gid: '1003'
+    home: /home/nmm-openvpn
+    password: x
+    shell: /bin/bash
+    uid: '1003'
+    username: nmm-openvpn
+usbmmux:
+    gid: '1002'
+    home: /home/usbmmux
+    password: x
+    shell: /bin/bash
+    uid: '1002'
+    username: usbmmux

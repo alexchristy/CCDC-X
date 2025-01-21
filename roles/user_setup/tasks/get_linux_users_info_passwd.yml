@@ -1,0 +1,33 @@
+# vars:
+#   usernames: <list_of_usernames>  # A list of usernames to fetch information for
+
+- name: Get information for each user
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ item }}"
+    split: ":"
+  register: user_info
+  with_items: "{{ usernames }}"
+
+- name: Clear users_info
+  set_fact:
+    users_info: {}
+
+- name: Parse user information into dictionary
+  set_fact:
+    users_info: >-
+      {{
+        users_info | default({}) | combine({
+          item.item: {
+            'username': item.item,
+            'password': item.ansible_facts.getent_passwd[item.item][0],
+            'uid': item.ansible_facts.getent_passwd[item.item][1],
+            'gid': item.ansible_facts.getent_passwd[item.item][2],
+            'home': item.ansible_facts.getent_passwd[item.item][4],
+            'shell': item.ansible_facts.getent_passwd[item.item][5]
+          }
+        })
+      }}
+  loop: "{{ user_info.results }}"
+  when: item.ansible_facts.getent_passwd is defined
+  no_log: true

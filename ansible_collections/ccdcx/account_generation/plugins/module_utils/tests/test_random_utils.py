@@ -1,6 +1,6 @@
 import random
 
-from module_utils.random_utils import random_whole_divide
+from ..random_utils import random_whole_divide
 
 ###### random_whole_divide ######
 

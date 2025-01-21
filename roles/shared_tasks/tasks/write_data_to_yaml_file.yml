@@ -1,0 +1,25 @@
+# vars:
+#   data_to_save: []  # Data to be written to the file (list or dictionary)
+#   output_dir: "/path/to/output"  # Directory to store the output file
+#   output_filename: "output.yml"  # Name of the output file
+
+- name: Save data to a YAML file
+  block:
+    - name: Check if the output file exists
+      ansible.builtin.stat:
+        path: "{{ output_dir }}/{{ output_filename }}"
+      register: output_file_stat
+
+    - name: Append content to the file if it exists
+      ansible.builtin.lineinfile:
+        path: "{{ output_dir }}/{{ output_filename }}"
+        line: "{{ data_to_save | to_nice_yaml }}"
+        create: no
+      when: output_file_stat.stat.exists
+
+    - name: Create file and write content if it doesn't exist
+      ansible.builtin.copy:
+        content: "{{ data_to_save | to_nice_yaml }}"
+        dest: "{{ output_dir }}/{{ output_filename }}"
+      when: not output_file_stat.stat.exists
+  delegate_to: localhost

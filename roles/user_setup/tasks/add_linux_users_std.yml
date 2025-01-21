@@ -1,0 +1,62 @@
+- name: Generate usernames for standard users
+  ccdcx.account_generation.generate_usernames:
+    number: "{{ std_users_number_to_add }}"
+    scheme: "{{ std_users_username_scheme }}"
+    name_seeds: "{{ std_users_username_seeds }}"
+    lowercase: true
+  delegate_to: localhost
+  register: std_usernames
+
+- name: Add standard users
+  ansible.builtin.user:
+    name: "{{ item }}"
+    create_home: yes
+    shell: "{{ std_users_shells | random }}"
+    password: "{{ std_users_password_hash }}"
+  with_items: "{{ std_usernames.usernames }}"
+  register: std_users_results
+
+- name: Extract successfully added standard users usernames
+  set_fact:
+    std_added_users_usernames: "{{ std_users_results.results | selectattr('changed', 'equalto', true) | map(attribute='item') | list }}"
+
+- name: Randomly select users to install SSH keys
+  block:
+    - name: Calculate number of users
+      set_fact:
+        std_users_num_users: "{{ std_added_users_usernames | length }}"
+    
+    - name: Calculate number of SSH keys to install
+      set_fact:
+        std_users_num_ssh_keys: "{{ (((std_users_num_users | float) * std_users_ssh_keys_rate) | round(0, 'floor')) }}"
+
+    - name: Shuffle list of usernames
+      set_fact:
+        std_added_users_shuffled_usernames: "{{ std_added_users_usernames | shuffle }}"
+
+    - name: Randomly select users for SSH keys
+      ansible.builtin.set_fact:
+        std_users_ssh_selected_users: "{{ std_added_users_shuffled_usernames[:std_users_num_ssh_keys | int] }}"
+  when: std_users_ssh_keys_enabled is defined and std_users_ssh_keys_enabled is true
+
+- name: Setup SSH key for select standard users
+  ansible.builtin.import_tasks:
+    file: add_linux_users_ssh_keys.yml
+  vars:
+    dest_dir: "{{ std_users_ssh_key_dir }}"
+    users: "{{ std_users_ssh_selected_users }}"
+  when: std_users_ssh_keys_enabled is defined and std_users_ssh_keys_enabled is true
+
+- name: Collect added standard users info
+  import_tasks: get_linux_users_info_passwd.yml
+  vars:
+    usernames: "{{ std_added_users_usernames }}"
+
+- name: Save standard users data
+  include_role:
+    name: shared_tasks
+    tasks_from: write_data_to_yaml_file.yml
+  vars:
+    data_to_save: "{{ users_info }}"
+    output_dir: "{{ std_users_dir }}"
+    output_filename: "{{ inventory_hostname }}{{ std_users_file_postfix }}"

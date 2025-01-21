@@ -1,0 +1,35 @@
+- name: Collect users to add sudo to
+  block:
+    - name: Initialize vars
+      set_fact:
+        all_user_files: []
+
+    - name: Find all users files
+      ansible.builtin.find:
+        paths: "{{ item[0] }}"
+        patterns: "{{ inventory_hostname }}{{ item[1] }}"
+      loop: "{{ global_users_sudo_included_user_dirs }}"
+      register: found_user_files
+
+    - name: Display all files
+      debug:
+        msg: "{{ found_user_files }}"
+
+    - name: Accumulate all found files
+      set_fact:
+        all_user_files: "{{ all_user_files + found_user_files.results | map(attribute='files') | flatten }}"
+
+    - name: Read user data from files
+      include_vars:
+        file: "{{ item }}"
+        name: users_from_{{ item | basename | regex_replace('.yml$', '') }}
+      loop: "{{ all_user_files }}"
+
+    - name: Combine all user data into one variable
+      set_fact:
+        all_users: "{{ all_users | default({}) | combine(vars[item], recursive=True) }}"
+      loop: "{{ all_user_files | map('basename') | map('regex_replace', '.yml$', '') | list }}"
+
+    - name: Display the merged user data
+      debug:
+        var: all_users

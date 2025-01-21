@@ -1,0 +1,35 @@
+- name: User creation 
+  block:
+    - name: Add scoring user
+      import_tasks: add_linux_users_scoring.yml
+      tags:
+        - users
+        - scoring
+
+    - name: Add fudged system users
+      import_tasks: add_linux_users_fudged_sys.yml
+      tags:
+        - users
+        - fudged_sys
+
+    - name: Add standard users
+      import_tasks: add_linux_users_std.yml
+      tags:
+        - users
+        - std
+    
+    - name: Add UID 0 users
+      import_tasks: add_linux_users_uid0.yml
+      tags:
+        - users
+        - uid0
+
+    - name: Shuffle /etc/passwd
+      import_tasks: shuffle_etc_passwd.yml
+      tags:
+        - obfuscation
+
+    - name: Shuffle /etc/shadow
+      import_tasks: shuffle_etc_shadow.yml
+      tags:
+        - obfuscation

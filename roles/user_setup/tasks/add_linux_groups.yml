@@ -1,0 +1,12 @@
+- name: Generate groups
+  ccdcx.account_generation.generate_groups:
+    num_groups: 5
+    group_type: "app"
+  delegate_to: localhost
+  register: gend_groups
+
+- name: Add groups
+  ansible.builtin.group:
+    name: "{{ item }}"
+    state: "present"
+  with_items: "{{ gend_groups.groups }}"

@@ -1,0 +1,3 @@
+# Common login creds for all templates
+ansible_user: root
+ansible_password: template-p@ss
