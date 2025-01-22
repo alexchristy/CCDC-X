@@ -60,10 +60,29 @@ target-version = "py310"
 [tool.pytest.ini_options]
 pythonpath = ["."]
 addopts = [
-    "--cov=library",
+    "--cov=.",
     "--cov-report=html",
-    "--cov-fail-under=85" # Fail if coverage is below 85%
+    "--cov-fail-under=85",   # Fail if coverage is below 85%
 ]
+
+[tool.coverage.run]
+source = ["."]
+omit = [
+    "*/.local/*",   # omit anything in a .local directory anywhere
+    "__init__.py",
+    "tests/*",
+    "*/tests/*",
+    "test_*",
+    "venv/*"        # omit anything in a .venv directory anywhere
+]
+
+[tool.coverage.report]
+fail_under = 85
+show_missing = true # Show lines that are missing in reports
+skip_empty = true
+
+[tool.coverage.html]
+directory = "htmlcov"   # Directory to output the HTML report
 
 [format]
 # Like Black, use double quotes for strings.

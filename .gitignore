@@ -6,6 +6,16 @@ __pycache__/
 # C extensions
 *.so
 
+# Generated lab assets
+generated_assets/
+red_team_kit.zip
+
+# Ignore everything in the inventory/ directory
+inventory/*
+
+# Allow only .ini files in inventory/
+!inventory/*.ini
+
 # Distribution / packaging
 .Python
 build/
