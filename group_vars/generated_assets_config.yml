@@ -8,6 +8,7 @@ std_users_file_postfix: "_std_users.yml"
 scoring_users_file_postfix: "_scoring_users.yml"
 uid0_users_file_postfix: "_uid0_users.yml"
 fudged_sys_users_file_postfix: "_fudged_sys_users.yml"
+blueteam_users_file_postfix: "_blueteam_users.yml"
 
 # Directories
 users_dir: "{{ default_generated_assets_dir }}/users"
@@ -15,9 +16,11 @@ std_users_dir: "{{ users_dir }}/std_users"
 scoring_users_dir: "{{ users_dir }}/scoring_users"
 uid0_users_dir: "{{ users_dir }}/uid0_users"
 fudged_sys_users_dir: "{{ users_dir }}/fudged_sys_users"
+blueteam_users_dir: "{{ users_dir }}/blueteam_users"
 
 # SSH keys
 std_users_ssh_key_dir: "{{ std_users_dir }}/ssh_keys"
 scoring_users_ssh_key_dir: "{{ scoring_users_dir }}/ssh_keys"
 uid0_users_ssh_key_dir: "{{ uid0_users_dir }}/ssh_keys"
 fudged_sys_users_ssh_key_dir: "{{ fudged_users_dir }}/ssh_keys"
+blueteam_users_ssh_key_dir: "{{ blueteam_users_dir }}/ssh_keys"

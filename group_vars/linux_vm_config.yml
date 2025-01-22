@@ -79,6 +79,17 @@ fudged_sys_users_shells: "{{ global_users_shells }}"
 fudged_sys_users_password: "{{ global_users_default_password }}"
 fudged_sys_users_password_hash: "{{ global_users_default_password_hash }}"
 
+####### Blueteam Users #######
+blueteam_user_username: "blueteam"
+
+# Shell
+blueteam_user_shell: "/bin/bash"
+
+# Password
+blueteam_user_password: "{{ global_users_default_password }}"
+blueteam_user_password_hash: "{{ global_users_default_password_hash }}"
+
+
 ########################
 # GROUP CONFIGURATIONS #
 ########################

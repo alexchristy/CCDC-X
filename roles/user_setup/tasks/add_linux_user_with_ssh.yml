@@ -1,0 +1,38 @@
+# vars:
+#   username: test-user                 # Username of the user to create
+#   shell: /bin/bash                    # Shell for user
+#   password_hash: secret               # Password of user to create
+#   users_file_dir: /path/to/dir        # Path to directory that has users file
+#   users_file_postfix: "_postfix.yml"  # Postfix of the user's file
+#   ssh_key_dir: /path/to/dir           # Path to directory to store the SSH key
+
+
+- name: Add user
+  ansible.builtin.user:
+    name: "{{ username }}"
+    create_home: yes
+    shell: "{{ shell }}"
+    password: "{{ password_hash }}"
+
+- name: Setup SSH key for user
+  ansible.builtin.import_tasks:
+    file: add_linux_users_ssh_keys.yml
+  vars:
+    dest_dir: "{{ ssh_key_dir }}"
+    users:
+      - "{{ username }}"
+
+- name: Collect user info
+  import_tasks: get_linux_users_info_passwd.yml
+  vars:
+    usernames:
+      - "{{ username }}"
+
+- name: Save user data
+  include_role:
+    name: shared_tasks
+    tasks_from: write_data_to_yaml_file.yml
+  vars:
+    data_to_save: "{{ users_info }}"
+    output_dir: "{{ users_file_dir }}"
+    output_filename: "{{ inventory_hostname }}{{ users_file_postfix }}"

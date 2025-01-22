@@ -1,0 +1,9 @@
+- name: Create red team kit 
+  include_role:
+    name: shared_tasks
+    tasks_from: zip_directory.yml
+  vars:
+    src_dir_path: "{{ default_generated_assets_dir }}"  # Specify the directory to zip
+    archive_password: "{{ red_team_kit_password }}"
+    archive_name: "{{ red_team_kit_name }}"
+    dest_dir: "{{ default_generated_assets_dir }}"

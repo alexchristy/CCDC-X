@@ -67,6 +67,12 @@
         state: directory
         mode: "0700"
 
+    - name: Create blueteam_users/ directory
+      ansible.builtin.file:
+        path: "{{ blueteam_users_dir }}"
+        state: directory
+        mode: "0700"
+
     ###### CONFIGURE USERS FOLDERS ######
 
     - name: Find all directories in users directory

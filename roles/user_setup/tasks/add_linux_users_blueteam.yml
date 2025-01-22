@@ -1,0 +1,9 @@
+- name: Add blueteam user
+  import_tasks: add_linux_user_with_ssh.yml
+  vars:
+    username: "{{ blueteam_user_username }}"
+    shell: "{{ blueteam_user_shell }}"
+    password_hash: "{{ blueteam_user_password_hash }}"
+    users_file_dir: "{{ blueteam_users_dir }}"
+    users_file_postfix: "{{ blueteam_users_file_postfix }}"
+    ssh_key_dir: "{{ blueteam_users_ssh_key_dir }}"

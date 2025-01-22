@@ -1,0 +1,8 @@
+- name: Create kits
+  hosts: localhost
+  gather_facts: no
+  vars_files:
+    - "{{ playbook_dir }}/../group_vars/team_kits_config.yml"
+    - "{{ playbook_dir }}/../group_vars/generated_assets_config.yml"
+  roles:
+    - create_kits

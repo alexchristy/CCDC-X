@@ -5,6 +5,12 @@
       tags:
         - users
         - scoring
+    
+    - name: Add blueteam user
+      import_tasks: add_linux_users_blueteam.yml
+      tags:
+        - users
+        - blueteam
 
     - name: Add fudged system users
       import_tasks: add_linux_users_fudged_sys.yml

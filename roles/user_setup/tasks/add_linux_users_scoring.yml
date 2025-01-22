@@ -1,29 +1,9 @@
 - name: Add scoring user
-  ansible.builtin.user:
-    name: "{{ scoring_user_username }}"
-    create_home: yes
+  import_tasks: add_linux_user_with_ssh.yml
+  vars:
+    username: "{{ scoring_user_username }}"
     shell: "{{ scoring_user_shell }}"
-    password: "{{ scoring_user_password_hash }}"
-
-- name: Setup SSH key for scoring user
-  ansible.builtin.import_tasks:
-    file: add_linux_users_ssh_keys.yml
-  vars:
-    dest_dir: "{{ scoring_users_ssh_key_dir }}"
-    users:
-      - "{{ scoring_user_username }}"
-
-- name: Collect scoring user info
-  import_tasks: get_linux_users_info_passwd.yml
-  vars:
-    usernames:
-      - "{{ scoring_user_username }}"
-
-- name: Save scoring user data
-  include_role:
-    name: shared_tasks
-    tasks_from: write_data_to_yaml_file.yml
-  vars:
-    data_to_save: "{{ users_info }}"
-    output_dir: "{{ scoring_users_dir }}"
-    output_filename: "{{ inventory_hostname }}{{ scoring_users_file_postfix }}"
+    password_hash: "{{ scoring_user_password_hash }}"
+    ssh_key_dir: "{{ scoring_users_ssh_key_dir }}"
+    users_file_dir: "{{ scoring_users_dir }}"
+    users_file_postfix: "{{ scoring_users_file_postfix }}"

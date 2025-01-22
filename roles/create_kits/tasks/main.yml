@@ -1,0 +1,7 @@
+- name: Create team kits 
+  block:
+    - name: Create red team kits
+      import_tasks: create_red_team_kit.yml
+      tags:
+        - red
+        - scoring

@@ -1,0 +1,40 @@
+# vars:
+#   src_dir_path: "/path/to/your/directory"   # Specify the source directory to zip
+#   archive_name: "custom_archive"        # Specify the zip archive name
+#   archive_password: ""                      # Leave blank for no password protection
+#   dest_dir:                                 # Specify destination directory for zip archive
+
+- name: Prepare temporary folder structure
+  ansible.builtin.command:
+    cmd: "mkdir -p /tmp/{{ archive_name }}"
+
+- name: Copy contents
+  ansible.builtin.command:
+    cmd: "cp -r {{ src_dir_path }}/ /tmp/{{ archive_name }}"
+
+- name: Compress directory without password
+  ansible.builtin.command:
+    cmd: "zip -r /tmp/{{ archive_name }} {{ archive_name }}.zip"
+    chdir: /tmp
+  when: archive_password == ""
+
+- name: Compress directory with password protection
+  ansible.builtin.command:
+    cmd: "zip -P {{ archive_password }} -r {{ archive_name }}.zip {{ archive_name }}"
+    chdir: /tmp
+  when: archive_password != ""
+
+- name: Copy archive to destination
+  ansible.builtin.copy:
+    src: "/tmp/{{ archive_name }}.zip"
+    dest: "{{ dest_dir }}"
+
+- name: Clean up temporary folder
+  ansible.builtin.file:
+    path: "/tmp/{{ archive_name }}"
+    state: absent
+
+- name: Clean up temporary archive file
+  ansible.builtin.file:
+    path: "/tmp/{{ archive_name }}.zip"
+    state: absent

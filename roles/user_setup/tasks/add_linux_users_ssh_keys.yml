@@ -5,7 +5,7 @@
 # Generate SSH keypair for each user
 - name: Generate SSH key pair for each user
   ansible.builtin.openssh_keypair:
-    path: "/tmp/{{ item }}_id_rsa"
+    path: "~/{{ item }}_id_rsa"
     type: rsa
     size: "{{ [2048, 4096] | random }}"
     state: present
@@ -17,7 +17,7 @@
   ansible.builtin.file:
     path: "/home/{{ item }}/.ssh"
     state: directory
-    mode: '0700'
+    mode: '700'
     owner: "{{ item }}"
     group: "{{ item }}"
   loop: "{{ users }}"
