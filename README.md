@@ -1,9 +1,9 @@
 # CCDC-X
 Welcome to the 202X CCDC competition. Generate new CCDC style networks on the fly.
 
-## Setup
+## Quickstart 
 
-Follow the steps below to setup the configure the project.
+Follow the steps below to setup the configure the project and run playbooks right away.
 
 1) Create Python virtual environment
 
@@ -35,6 +35,25 @@ Follow the steps below to setup the configure the project.
     ansible-playbook ./setup.yml
     ```
 
+6) Configure `inventory/hosts.ini`. *Example:*
+
+    ```ini
+    [linux_hosts]
+    dns_main ansible_host=1.1.1.1
+
+    [linux_hosts:vars]
+    ansible_user="ubuntu"
+    ansible_ssh_private_key_file="/path/to/private/key.pem"
+    ansible_become=true
+    ansible_become_method=sudo
+    ```
+
+7) Run a playbook. *Example: Adding misconfigured users to a system.*
+
+    ```bash
+    ansible-playbook -i inventory/hosts.ini playbooks/user_setup.yml
+    ```
+
 ## Playbooks
 
 All playbooks are in `playbooks/`.
@@ -48,6 +67,12 @@ All playbooks are in `playbooks/`.
 
     All VMs are named with the `network_name` prefixed.
 
+    **Details:**
+    - Targets: `proxmox_nodes`
+    - Variable Files:
+        - `proxmox.yml` (vault)
+        - `network.yml`
+
     **Example:**
     ```bash
     ansible-playbook -i inventory/hosts.ini playbooks/gen_random_ccdc.yml --ask-vault-pass -e "ref_vmid=666000"
@@ -57,10 +82,32 @@ All playbooks are in `playbooks/`.
 
     This playbook deletes all VMs that are prefixed with the `network_name` value.
 
+    **Details:**
+    - Targets: `proxmox_nodes`
+    - Variable Files:
+        - `proxmox.yml` (vault)
+        - `network.yml`
+
     **Example:**
     ```bash
     ansible-playbook -i invenvtory/hosts.ini playbooks/gen_random_ccdc.yml --ask-vault-pass
     ```
+
+3)  `user_setup.yml`
+
+    This playbook handles creating all the common user misconfigurations seen in a CCDC-style competition. To see the current capabilities of this playbook see [PROGRESS.md](./PROGRESS.md) and the `user_setup` role's [main.yml](./roles/user_setup/tasks/main.yml) for an overview.
+
+    **Details:**
+    - Targets: `linux_hosts`
+    - Variable Files:
+        - `linux_vm_config.yml`
+        - `generated_assets_config.yml`
+
+    **Example:** *Add UID 0 (root users) and obfuscate the added accounts.*
+    ```bash
+    ansible-playbook -i inventory/hosts.ini playbooks/user_setup.yml --tags uid0,obfuscation
+    ```
+
 
 ## Development Setup
 
@@ -87,4 +134,10 @@ All playbooks are in `playbooks/`.
 
     ```bash
     ansible-galaxy install -r requirements.yml
+    ```
+
+5) Configure project
+
+    ```bash
+    ansible-playbook setup.yml
     ```
