@@ -18,7 +18,7 @@ scoring_user_password_hash: "{{ scoring_user_password | password_hash('sha512', 
 
 ###### Global user configurations ######
 global_users_username_scheme: "\\f.\\l+" # Ex: John Smith --> j.smith
-global_users_default_password: "ccdctryouts25"
+global_users_default_password: "ncaetryouts25"
 global_users_shells: "{{ existing_shells }}"
 
 # Password

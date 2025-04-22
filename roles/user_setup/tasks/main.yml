@@ -39,3 +39,8 @@
       import_tasks: shuffle_etc_shadow.yml
       tags:
         - obfuscation
+
+    - name: Set hostname to inventory name
+      import_tasks: set_linux_hostname.yml
+      tags:
+        - name

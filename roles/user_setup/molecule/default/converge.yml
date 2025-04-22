@@ -1,0 +1,10 @@
+---
+- name: Test user_setup role
+  hosts: all
+  gather_facts: yes
+  vars_files:
+    # Paths adjusted to be relative to the molecule/default directory
+    - ../../../../group_vars/linux_vm_config.yml
+    - ../../../../group_vars/generated_assets_config.yml
+  roles:
+    - user_setup

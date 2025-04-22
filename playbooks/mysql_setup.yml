@@ -1,0 +1,5 @@
+- name: Setup MySQL
+  hosts: linux_hosts
+  gather_facts: yes
+  roles:
+    - mysql_setup

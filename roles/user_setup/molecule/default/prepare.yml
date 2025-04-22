@@ -1,0 +1,16 @@
+---
+- name: Prepare instances
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Update package manager cache
+      raw: |
+        {% if lookup('env', 'PKG_MGR') == 'apt' %}
+        apt-get update -y
+        {% endif %}
+
+    - name: Install Python 3.10
+      raw: |
+        {% if lookup('env', 'PKG_MGR') == 'apt' %}
+        DEBIAN_FRONTEND=noninteractive apt-get install -y python3.10
+        {% endif %}

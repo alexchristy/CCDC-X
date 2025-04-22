@@ -1,0 +1,35 @@
+---
+driver:
+  name: docker
+
+platforms:
+  ###### Ubuntu ######
+  - name: ubuntu-20.04
+    image: ubuntu:20.04
+    pre_build_image: true
+    environment:
+      PKG_MGR: apt
+  
+  - name: ubuntu-22.04
+    image: ubuntu:22.04
+    pre_build_image: true
+    environment:
+      PKG_MGR: apt
+  
+  - name: ubuntu-24.04
+    image: ubuntu:24.04
+    pre_build_image: true
+    environment:
+      PKG_MGR: apt
+
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_COLLECTIONS_PATHS: "../../../../../ansible_collections"
+  
+  prepare:
+    playbooks:
+      - prepare.yml
+
+  playbooks:
+    converge: converge.yml

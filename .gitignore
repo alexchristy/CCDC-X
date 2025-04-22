@@ -16,6 +16,9 @@ inventory/*
 # Allow only .ini files in inventory/
 !inventory/*.ini
 
+# Prevent uploading private keys
+*.pem
+
 # Distribution / packaging
 .Python
 build/

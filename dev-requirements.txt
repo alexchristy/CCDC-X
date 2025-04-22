@@ -13,3 +13,6 @@ pytest-mock>=3.14.0
 pytest-cov>=6.0.0
 pre-commit>=4.0.1
 mypy>=1.13.0
+ansible-dev-tools>=25.1.0
+docker>=7.1.0
+molecule-docker>=2.1.0

@@ -1,0 +1,9 @@
+{
+  "plugins": [
+    "git-tag"
+  ],
+  "owner": "alexchristy",
+  "repo": "CCDC-X",
+  "name": "Alex Christy",
+  "email": "a.christy@ufl.edu"
+}
